@@ -1,0 +1,18 @@
+name: Print entire received webhook payload
+
+on:
+  # Allow invoking via webhook event.
+  repository_dispatch:
+    types:
+      - example
+
+jobs:
+  printPayload:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Print entire webhook payload
+        env:
+          PAYLOAD: ${{ toJSON(github.event.client_payload) }}
+        run: |
+          echo "${PAYLOAD}"

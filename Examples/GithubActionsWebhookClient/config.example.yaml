@@ -1,0 +1,8 @@
+appId: 123456
+privateKey: |
+  -----BEGIN RSA PRIVATE KEY-----
+  ...
+  -----END RSA PRIVATE KEY-----
+username: MPLew-is
+repository: github-graphql-client
+eventType: example
