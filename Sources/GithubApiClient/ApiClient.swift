@@ -169,7 +169,7 @@ public class GithubApiClient {
 
 
 	/// Stored async HTTP client object, either auto-created or input by the user
-	let httpClient: HTTPClient
+	private let httpClient: HTTPClient
 	/// Whether this wrapper should shut down the HTTP client on `deinit`
 	private let shouldShutdownHttpClient: Bool
 
@@ -179,7 +179,7 @@ public class GithubApiClient {
 	/// Unique ID for the GitHub App this client is authenticating as an installation of
 	private let appId: String
 	/// Unique ID for the installation of a GitHub App this client is authenticating as
-	let installationId: Int
+	private let installationId: Int
 
 	/**
 	Initialize an instance, fetching the installation ID using the input login name.
