@@ -76,8 +76,7 @@ struct WebhookClient: AsyncParsableCommand {
 		requestBody.append(try payloadFile.handle.readToEnd()!)
 		requestBody.append(suffix.data(using: .utf8)!)
 
-		var request: HTTPClientRequest = .init(url: "https://api.github.com/repos/\(configuration.username)/\(configuration.repository)/dispatches")
-		request.method = .POST
+		var request: HTTPClientRequest = GithubApiEndpoint.repositoryDispatch(username: configuration.username, repository: configuration.repository).request
 		request.body = .bytes(requestBody)
 
 		let response = try await client.execute(request)

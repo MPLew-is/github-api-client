@@ -288,6 +288,8 @@ public enum GithubApiEndpoint {
 	case appInstallations
 	/// https://docs.github.com/en/rest/apps/apps#create-an-installation-access-token-for-an-app
 	case installationToken(installationId: Int)
+	/// [Create a workflow dispatch event](https://docs.github.com/en/rest/actions/workflows#create-a-workflow-dispatch-event)
+	case repositoryDispatch(username: String, repository: String)
 
 
 	/// The HTTP method associated with the endpoint
@@ -295,7 +297,7 @@ public enum GithubApiEndpoint {
 		switch self {
 			case .appInstallations:
 				return .GET
-			case .installationToken:
+			case .installationToken, .repositoryDispatch:
 				return .POST
 		}
 	}
@@ -308,6 +310,9 @@ public enum GithubApiEndpoint {
 
 			case .installationToken(let installationId):
 				return "\(Self.appInstallations.path)/\(installationId)/access_tokens"
+
+			case .repositoryDispatch(let username, let repository):
+				return "repos/\(username)/\(repository)/dispatches"
 		}
 	}
 
