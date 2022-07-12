@@ -35,7 +35,7 @@ At the end of this quick start, you should be able to receive your arbitrary pay
 
 Here are some example commands for sending messages or showing help information about the CLI:
 
-- `swift run < payload.example.json`: send the exact example payload shown above
+- `swift run GithubActionsWebhookClient < payload.example.json`: send the exact example payload shown above
 - `swift run GithubActionsWebhookClient --help`: print the CLI's help messages (which show what values can be configured)
-- `swift run < {path/to/payload}.json`: send your own payload file
+- `swift run GithubActionsWebhookClient < {path/to/payload}.json`: send your own payload file
 - `swift run GithubActionsWebhookClient --payload path/to/payload.json`: send your own payload file, without using shell redirection

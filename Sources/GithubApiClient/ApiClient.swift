@@ -290,6 +290,8 @@ public enum GithubApiEndpoint {
 	case installationToken(installationId: Int)
 	/// [Create a workflow dispatch event](https://docs.github.com/en/rest/actions/workflows#create-a-workflow-dispatch-event)
 	case repositoryDispatch(username: String, repository: String)
+	/// [Query the GraphQL API](https://docs.github.com/en/graphql/guides/forming-calls-with-graphql)
+	case graphql
 
 
 	/// The HTTP method associated with the endpoint
@@ -297,7 +299,7 @@ public enum GithubApiEndpoint {
 		switch self {
 			case .appInstallations:
 				return .GET
-			case .installationToken, .repositoryDispatch:
+			case .installationToken, .repositoryDispatch, .graphql:
 				return .POST
 		}
 	}
@@ -313,6 +315,9 @@ public enum GithubApiEndpoint {
 
 			case .repositoryDispatch(let username, let repository):
 				return "repos/\(username)/\(repository)/dispatches"
+
+			case .graphql:
+				return "graphql"
 		}
 	}
 

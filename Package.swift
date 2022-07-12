@@ -12,6 +12,10 @@ let package = Package(
 			name: "GithubApiClient",
 			targets: ["GithubApiClient"]
 		),
+		.library(
+			name: "GithubGraphqlQueryable",
+			targets: ["GithubGraphqlQueryable"]
+		),
 	],
 	dependencies: [
 		.package(url: "https://github.com/apple/swift-argument-parser", from: "1.1.0"),
@@ -46,6 +50,31 @@ let package = Package(
 				"config.example.yaml",
 				"print-payload.yaml",
 				"payload.example.json",
+			]
+		),
+		.target(
+			name: "GithubGraphqlQueryable",
+			dependencies: [
+				.product(name: "DeepCodable", package: "deep-codable"),
+			]
+		),
+		.testTarget(
+			name: "GithubGraphqlQueryableTests",
+			dependencies: ["GithubGraphqlQueryable"]
+		),
+		.executableTarget(
+			name: "GithubProjectsGraphqlClient",
+			dependencies: [
+				"GithubApiClient",
+				"GithubGraphqlQueryable",
+				.product(name: "ArgumentParser", package: "swift-argument-parser"),
+				.product(name: "AsyncHTTPClient", package: "async-http-client"),
+				.product(name: "Yams", package: "Yams"),
+			],
+			path: "Examples/GithubProjectsGraphqlClient",
+			exclude: [
+				"config.yaml",
+				"config.example.yaml",
 			]
 		),
 	]
