@@ -284,9 +284,9 @@ public enum GithubApiEndpoint {
 	public static let baseUrl: String = "https://api.github.com"
 
 
-	/// https://docs.github.com/en/rest/apps/apps#list-installations-for-the-authenticated-app
+	/// [List installations for the authenticated app](https://docs.github.com/en/rest/apps/apps#list-installations-for-the-authenticated-app)
 	case appInstallations
-	/// https://docs.github.com/en/rest/apps/apps#create-an-installation-access-token-for-an-app
+	/// [Create an installation access token for an app](https://docs.github.com/en/rest/apps/apps#create-an-installation-access-token-for-an-app)
 	case installationToken(installationId: Int)
 	/// [Create a workflow dispatch event](https://docs.github.com/en/rest/actions/workflows#create-a-workflow-dispatch-event)
 	case repositoryDispatch(username: String, repository: String)
