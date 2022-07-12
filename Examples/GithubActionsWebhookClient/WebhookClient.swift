@@ -84,7 +84,7 @@ struct WebhookClient: AsyncParsableCommand {
 		guard response.status == .noContent else {
 			print("Status: \(response.status)")
 
-			let responseBody = Data(buffer: try await response.body.collect(upTo: 10 * 1024))
+			let responseBody: Data = .init(buffer: try await response.body.collect(upTo: 10 * 1024))
 			print("Body:")
 			print(String(data: responseBody, encoding: .utf8)!)
 
