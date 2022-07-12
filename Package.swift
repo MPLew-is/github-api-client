@@ -62,10 +62,18 @@ let package = Package(
 			name: "GithubGraphqlQueryableTests",
 			dependencies: ["GithubGraphqlQueryable"]
 		),
+		.target(
+			name: "GithubGraphqlClient",
+			dependencies: [
+				"GithubApiClient",
+				"GithubGraphqlQueryable",
+				.product(name: "AsyncHTTPClient", package: "async-http-client"),
+			]
+		),
 		.executableTarget(
 			name: "GithubProjectsGraphqlClient",
 			dependencies: [
-				"GithubApiClient",
+				"GithubGraphqlClient",
 				"GithubGraphqlQueryable",
 				.product(name: "ArgumentParser", package: "swift-argument-parser"),
 				.product(name: "AsyncHTTPClient", package: "async-http-client"),

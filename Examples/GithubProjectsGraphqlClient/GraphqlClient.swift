@@ -4,7 +4,7 @@ import ArgumentParser
 import AsyncHTTPClient
 import Yams
 
-import GithubApiClient
+import GithubGraphqlClient
 import GithubGraphqlQueryable
 
 
@@ -107,40 +107,23 @@ struct GraphqlClient: AsyncParsableCommand {
 		let decoder = YAMLDecoder()
 		let configuration = try decoder.decode(GraphqlClientConfiguration.self, from: configurationData)
 
-		let client: GithubApiClient = try await .init(
+		let client: GithubGraphqlClient = try await .init(
 			appId: configuration.appId,
 			privateKey: configuration.privateKey,
 			installationLogin: configuration.username
 		)
 
-		var request: HTTPClientRequest = GithubApiEndpoint.graphql.request
-
-		let query = ProjectItem.query(id: self.itemId)
-		let requestBody: GraphqlRequest = .init(query: query)
-		let requestBody_data = try JSONEncoder().encode(requestBody)
-		request.body = .bytes(requestBody_data)
-
-		let response = try await client.execute(request)
-
-		guard response.status == .ok else {
+		do {
+			let item = try await client.query(ProjectItem.self, id: self.itemId)
+			print(item)
+		}
+		catch GithubGraphqlClientError.httpError(let response) {
 			print("Status: \(response.status)")
 
 			let responseBody: Data = .init(buffer: try await response.body.collect(upTo: 10 * 1024))
 			print("Body:")
 			print(String(data: responseBody, encoding: .utf8)!)
 
-			throw ExitCode.failure
-		}
-
-		let responseBody: Data = .init(buffer: try await response.body.collect(upTo: 10 * 1024))
-
-		do {
-			let item = try JSONDecoder().decode(ProjectItem.self, from: responseBody)
-			print(item)
-		}
-		catch {
-			print("Error in decoding response:")
-			print(String(data: responseBody, encoding: .utf8)!)
 			throw ExitCode.failure
 		}
 	}
