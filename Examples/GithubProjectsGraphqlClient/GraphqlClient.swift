@@ -2,6 +2,7 @@ import Foundation
 
 import ArgumentParser
 import AsyncHTTPClient
+import NIOFoundationCompat
 import Yams
 
 import GithubGraphqlClient

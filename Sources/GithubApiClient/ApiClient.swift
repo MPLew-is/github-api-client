@@ -4,6 +4,7 @@ import AsyncHTTPClient
 import DeepCodable
 import JWTKit
 import NIOCore
+import NIOFoundationCompat
 import NIOHTTP1
 
 

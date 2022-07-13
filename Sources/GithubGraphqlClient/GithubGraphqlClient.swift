@@ -1,6 +1,7 @@
 import Foundation
 
 import AsyncHTTPClient
+import NIOFoundationCompat
 
 import GithubApiClient
 import GithubGraphqlQueryable
