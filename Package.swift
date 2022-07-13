@@ -16,6 +16,10 @@ let package = Package(
 			name: "GithubGraphqlQueryable",
 			targets: ["GithubGraphqlQueryable"]
 		),
+		.library(
+			name: "GithubGraphqlClient",
+			targets: ["GithubGraphqlClient"]
+		),
 	],
 	dependencies: [
 		.package(url: "https://github.com/apple/swift-argument-parser", from: "1.1.0"),
