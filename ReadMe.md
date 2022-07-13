@@ -69,7 +69,7 @@ import GithubGraphqlQueryable
 			-----END RSA PRIVATE KEY-----
 			""" // Replace with your GitHub App's private key
 		let client: GithubGraphqlClient = try await .init(
-			appId: 123456, // Replace with your GitHub App ID
+			appId: "123456", // Replace with your GitHub App ID
 			privateKey: privateKey,
 			installationLogin: "MPLew-is" // Replace with the user on which your app has been installed
 		)
