@@ -85,6 +85,9 @@ let package = Package(
 			],
 			path: "Examples/GithubProjectsGraphqlClient",
 			exclude: [
+				"ReadMe.md",
+				"example-output-light.png",
+				"example-output-dark.png",
 				"config.yaml",
 				"config.example.yaml",
 			]
