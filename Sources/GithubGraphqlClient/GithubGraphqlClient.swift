@@ -53,7 +53,8 @@ public struct GithubGraphqlClient {
 
 		let query = type.query(id: id)
 		let requestBody: GraphqlRequest = .init(query: query)
-		request.body = .bytes(try JSONEncoder().encode(requestBody))
+		let requestBody_data = try JSONEncoder().encode(requestBody)
+		request.body = .bytes(requestBody_data)
 
 		let response = try await client.execute(request)
 		guard response.status == .ok else {
