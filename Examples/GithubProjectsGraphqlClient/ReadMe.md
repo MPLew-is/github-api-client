@@ -25,14 +25,14 @@ At the end of this quick start, you should be able to print out details about Gi
 3. [Create a GitHub App](https://docs.github.com/en/developers/apps/building-github-apps/creating-a-github-app) in your account (alternatively use an existing app you have already created)
 	- The only values you need to fill in is the app name and URL (which can be your GitHub profile URL), and you can uncheck `Active` under `Webhook`
 	- Under `Organization permissions`, then `Projects`, grant `Read-only` permissions
-3. After successful creation, copy the `App ID` value and replace the example value for the key `appId` in `config.yaml`
-4. At the bottom of the same page, under `Private keys`, generate a private key for your app
-5. Open the generated and downloaded `.pem` file in a text editor, copy the entire contents, and replace the example value for the key `privateKey` in `config.yaml`
-6. [Create a new example project](https://docs.github.com/en/issues/trying-out-the-new-projects-experience/quickstart#creating-a-project) (alternatively reuse an existing project you have already created)
-7. [Install your new app on the account containing the new project](https://docs.github.com/en/developers/apps/managing-github-apps/installing-github-apps#installing-your-private-github-app-on-your-repository)
-8. After successful installation, copy the username of the user or organization you installed the app on and replace the example value for the key `username` in `config.yaml`
-9. [Add a new draft issue to your project](https://docs.github.com/en/issues/trying-out-the-new-projects-experience/quickstart#adding-draft-issues-to-your-project)
-10. Get the unique node ID for the draft issue:
+4. After successful creation, copy the `App ID` value and replace the example value for the key `appId` in `config.yaml`
+5. At the bottom of the same page, under `Private keys`, generate a private key for your app
+6. Open the generated and downloaded `.pem` file in a text editor, copy the entire contents, and replace the example value for the key `privateKey` in `config.yaml`
+7. [Create a new example project](https://docs.github.com/en/issues/trying-out-the-new-projects-experience/quickstart#creating-a-project) (alternatively reuse an existing project you have already created)
+8. [Install your new app on the account containing the new project](https://docs.github.com/en/developers/apps/managing-github-apps/installing-github-apps#installing-your-private-github-app-on-your-repository)
+9. After successful installation, copy the username of the user or organization you installed the app on and replace the example value for the key `username` in `config.yaml`
+10. [Add a new draft issue to your project](https://docs.github.com/en/issues/trying-out-the-new-projects-experience/quickstart#adding-draft-issues-to-your-project)
+11. Get the unique node ID for the draft issue:
 	- From the URL of your new project, copy the ID of the project (`https://github.com/.../{username}/projects/{id}`)
 	- Run the following command, replacing `{username}` and `{projectId}` with your corresponding values:
 		```sh

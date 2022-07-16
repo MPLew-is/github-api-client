@@ -18,17 +18,17 @@ At the end of this quick start, you should be able to receive your arbitrary pay
 ### Setup ###
 
 1. In this directory, copy `config.example.yaml` to `config.yaml`
-4. [Create a GitHub App](https://docs.github.com/en/developers/apps/building-github-apps/creating-a-github-app) in your account (alternatively use an existing app you have already created)
+2. [Create a GitHub App](https://docs.github.com/en/developers/apps/building-github-apps/creating-a-github-app) in your account (alternatively use an existing app you have already created)
 	- The only values you need to fill in is the app name and URL (which can be your GitHub profile URL), and you can uncheck `Active` under `Webhook`
 	- Under `Repository permissions`, then `Contents`, grant `Read and write` permissions (this allows invoking an Actions webhook)
-5. After successful creation, copy the `App ID` value and replace the example value for the key `appId` in `config.yaml`
-6. At the bottom of the same page, under `Private keys`, generate a private key for your app
-7. Open the generated and downloaded `.pem` file in a text editor, copy the entire contents, and replace the example value for the key `privateKey` in `config.yaml`
-8. [Create a new example repository](https://github.com/new) at which to receive your webhook (alternatively reuse an existing repo you have already created)
-9. Copy the repository name and replace the example value for the key `repository` in `config.yaml`
-10. [Install your new app on your example repository](https://docs.github.com/en/developers/apps/managing-github-apps/installing-github-apps#installing-your-private-github-app-on-your-repository)
-11. After successful installation, copy the username of the user or organization you installed the app on and replace the example value for the key `username` in `config.yaml`
-12. Copy the file `print-payload.yaml` to your example repository, at the path `.github/workflows/print-payload.yaml`, then commit and push the changes
+3. After successful creation, copy the `App ID` value and replace the example value for the key `appId` in `config.yaml`
+4. At the bottom of the same page, under `Private keys`, generate a private key for your app
+5. Open the generated and downloaded `.pem` file in a text editor, copy the entire contents, and replace the example value for the key `privateKey` in `config.yaml`
+6. [Create a new example repository](https://github.com/new) at which to receive your webhook (alternatively reuse an existing repo you have already created)
+7. Copy the repository name and replace the example value for the key `repository` in `config.yaml`
+8. [Install your new app on your example repository](https://docs.github.com/en/developers/apps/managing-github-apps/installing-github-apps#installing-your-private-github-app-on-your-repository)
+9. After successful installation, copy the username of the user or organization you installed the app on and replace the example value for the key `username` in `config.yaml`
+10. Copy the file `print-payload.yaml` to your example repository, at the path `.github/workflows/print-payload.yaml`, then commit and push the changes
 
 
 ### Sending messages ###
