@@ -120,28 +120,8 @@ public class GithubApiClient {
 	private static let acceptType: String = "application/vnd.github.v3+json"
 
 
-	/**
-	Generate a new authentication token with "current" issued-at and expiration times
-
-	This actually returns an issued-at time one minute in the past, [as recommended in the GitHub documentation to allow for clock drift](https://docs.github.com/en/developers/apps/building-github-apps/authenticating-with-github-apps#authenticating-as-a-github-app).
-	The expiration of the returned token will be 10 minutes from the issued-at time, the maximum allowable by the GitHub API
-
-	- Parameter appId: GitHub App ID to be used as the issuer claim
-	- Returns: New instance of an authentication token object, valid for ~9 minutes
-	*/
-	private static func generateAppTokenPayload(appId: String) -> AppAuthenticationToken {
-		let issuedAt: Date = .init(timeIntervalSinceNow: -60)
-		let expiration     = issuedAt + (10 * 60)
-		return .init(
-			issuedAt:   .init(rounding: issuedAt),
-			expiration: .init(rounding: expiration),
-			issuer:     .init(value: appId)
-		)
-	}
-
-
 	/// Stored app-level authentication token payload
-	private var appTokenPayload: AppAuthenticationToken
+	private var appTokenPayload: AppAuthenticationToken?
 
 	/**
 	Signed app authentication token
@@ -150,11 +130,17 @@ public class GithubApiClient {
 	*/
 	private var appToken: String {
 		get throws {
-			if !self.appTokenPayload.isValid {
-				self.appTokenPayload = Self.generateAppTokenPayload(appId: self.appId)
+			if self.appTokenPayload == nil || !self.appTokenPayload!.isValid {
+				let issuedAt: Date = .init(timeIntervalSinceNow: -60)
+				let expiration     = issuedAt + (10 * 60)
+				self.appTokenPayload = .init(
+					issuedAt:   .init(rounding: issuedAt),
+					expiration: .init(rounding: expiration),
+					issuer:     .init(value: self.appId)
+				)
 			}
 
-			return try self.appTokenPayload.signed(using: self.signers)
+			return try self.appTokenPayload!.signed(using: self.signers)
 		}
 	}
 
@@ -179,8 +165,6 @@ public class GithubApiClient {
 
 	/// Unique ID for the GitHub App this client is authenticating as an installation of
 	private let appId: String
-	/// Unique ID for the installation of a GitHub App this client is authenticating as
-	private let installationId: Int
 
 	/**
 	Initialize an instance, fetching the installation ID using the input login name.
@@ -188,17 +172,15 @@ public class GithubApiClient {
 	- Parameters:
 		- appId: unique ID for the GitHub App this client is authenticating as an installation of
 		- privateKey: PEM-encoded private key of the GitHub App, to authenticate as the app to the GitHub API
-		- installationLogin: login name of the account the GitHub App has been installed on, and on whose resources the actual API calls will be made
 		- httpClient: if not provided, the instance will create a new one and destroy it on `deinit`
 
-	- Throws: `ClientError` if an error occurs during initial authentication; also rethrows any that happen from underlying HTTP/JWT/decoding operations
+	- Throws: Only rethrows any that happen from underlying HTTP/JWT/decoding operations
 	*/
 	public init(
 		appId: String,
 		privateKey: String,
-		installationLogin: String,
 		httpClient: HTTPClient? = nil
-	) async throws {
+	) throws {
 		self.appId = appId
 
 		self.signers = .init()
@@ -208,20 +190,34 @@ public class GithubApiClient {
 
 
 		if httpClient == nil {
-			self.httpClient = HTTPClient(eventLoopGroupProvider: .createNew)
+			self.httpClient = .init(eventLoopGroupProvider: .createNew)
 			self.shouldShutdownHttpClient = true
 		}
 		else {
 			self.httpClient = httpClient!
 			self.shouldShutdownHttpClient = false
 		}
+	}
+
+	deinit {
+		if self.shouldShutdownHttpClient {
+			try? httpClient.syncShutdown()
+		}
+	}
 
 
-		self.appTokenPayload = Self.generateAppTokenPayload(appId: appId)
-		let appToken = try self.appTokenPayload.signed(using: signers)
+	/**
+	Get a unique installation ID from the input installation login username.
 
+	This has to be a special method rather than a normal call to `execute` since this only authenticates with the app token, and the user may not even know their installation ID until making this call.
+
+	- Parameter login: GitHub username that this app was installed on
+	- Returns: integer installation ID to use for future calls to `execute`
+	- Throws: `ClientError` if an error occurs during initial authentication; also rethrows any that happen from underlying HTTP/JWT/decoding operations
+	*/
+	public func getInstallationId(login: String) async throws -> Int {
 		var installationsRequest: HTTPClientRequest = GithubApiEndpoint.appInstallations.request
-		installationsRequest.headers.add(name: "Authorization", value: "Bearer \(appToken)")
+		installationsRequest.headers.add(name: "Authorization", value: "Bearer \(try self.appToken)")
 		installationsRequest.headers.add(name: "User-Agent",    value: Self.userAgent)
 		installationsRequest.headers.add(name: "Accept",        value: Self.acceptType)
 
@@ -229,18 +225,12 @@ public class GithubApiClient {
 		let installationsBody = Data(buffer: try await installationsResponse.body.collect(upTo: 4 * 1024))
 		let installations = try JSONDecoder().decode([InstallationResponse].self, from: installationsBody)
 
-		let installation = installations.first { $0.login == installationLogin }
+		let installation = installations.first { $0.login == login }
 		guard let installation = installation else {
 			throw ClientError.noMatchingInstallation
 		}
 
-		self.installationId = installation.id
-	}
-
-	deinit {
-		if self.shouldShutdownHttpClient {
-			try? httpClient.syncShutdown()
-		}
+		return installation.id
 	}
 
 
@@ -257,9 +247,9 @@ public class GithubApiClient {
 	- Returns: An `HTTPClientResponse` from the underlying `AsyncHTTPClient` implementation, representing the response to the input request
 	- Throws: Only rethrows errors from the underlying `AsyncHTTPClient`/decoding calls
 	*/
-	public func execute(_ request: HTTPClientRequest, timeout: NIOCore.TimeAmount = .seconds(10)) async throws -> HTTPClientResponse {
+	public func execute(_ request: HTTPClientRequest, for installationId: Int, timeout: NIOCore.TimeAmount = .seconds(10)) async throws -> HTTPClientResponse {
 		// We could cache the installation token until it expires, but as a first pass let's just grab a new one each time.
-		var tokenRequest: HTTPClientRequest = GithubApiEndpoint.installationToken(installationId: self.installationId).request
+		var tokenRequest: HTTPClientRequest = GithubApiEndpoint.installationToken(installationId: installationId).request
 		tokenRequest.headers.add(name: "Authorization", value: "Bearer \(try self.appToken)")
 		tokenRequest.headers.add(name: "User-Agent",    value: Self.userAgent)
 		tokenRequest.headers.add(name: "Accept",        value: Self.acceptType)

@@ -11,6 +11,8 @@ import GithubGraphqlQueryable
 public struct GithubGraphqlClient {
 	/// Underlying client used to invoke the GitHub API
 	public let client: GithubApiClient
+	/// Unique installation ID corresponding to the textual login input as configuration.
+	private let installationId: Int
 
 	/**
 	Initialize an instance, passing through parameters to the underlying `GithubApiClient` initializer.
@@ -29,7 +31,10 @@ public struct GithubGraphqlClient {
 		installationLogin: String,
 		httpClient: HTTPClient? = nil
 	) async throws {
-		self.client = try await .init(appId: appId, privateKey: privateKey, installationLogin: installationLogin, httpClient: httpClient)
+		let client = try GithubApiClient(appId: appId, privateKey: privateKey, httpClient: httpClient)
+		self.installationId = try await client.getInstallationId(login: installationLogin)
+
+		self.client = client
 	}
 
 
@@ -56,7 +61,7 @@ public struct GithubGraphqlClient {
 		let requestBody_data = try JSONEncoder().encode(requestBody)
 		request.body = .bytes(requestBody_data)
 
-		let response = try await client.execute(request)
+		let response = try await client.execute(request, for: self.installationId)
 		guard response.status == .ok else {
 			throw GithubGraphqlClientError.httpError(response)
 		}

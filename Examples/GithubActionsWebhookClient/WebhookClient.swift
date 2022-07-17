@@ -61,11 +61,12 @@ struct WebhookClient: AsyncParsableCommand {
 		let decoder = YAMLDecoder()
 		let configuration = try decoder.decode(WebhookClientConfiguration.self, from: configurationData)
 
-		let client: GithubApiClient = try await .init(
+		let client: GithubApiClient = try .init(
 			appId: configuration.appId,
-			privateKey: configuration.privateKey,
-			installationLogin: configuration.username
+			privateKey: configuration.privateKey
 		)
+
+		let installationId = try await client.getInstallationId(login: configuration.username)
 
 
 		// For this example, just wrap the input data with the configured event type without doing any other validation or processing.
@@ -80,7 +81,7 @@ struct WebhookClient: AsyncParsableCommand {
 		var request: HTTPClientRequest = GithubApiEndpoint.repositoryDispatch(username: configuration.username, repository: configuration.repository).request
 		request.body = .bytes(requestBody)
 
-		let response = try await client.execute(request)
+		let response = try await client.execute(request, for: installationId)
 
 		guard response.status == .noContent else {
 			print("Status: \(response.status)")
