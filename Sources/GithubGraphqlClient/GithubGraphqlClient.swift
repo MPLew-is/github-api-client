@@ -13,6 +13,15 @@ public struct GithubGraphqlClient {
 	public let client: GithubApiClient
 
 	/**
+	Initialize an instance from an existing GitHub API client.
+
+	- Parameter client: GitHub API client object this wrapping client should use to make API calls
+	*/
+	public init(_ client: GithubApiClient) {
+		self.client = client
+	}
+
+	/**
 	Initialize an instance, passing through parameters to the underlying `GithubApiClient` initializer.
 
 	- Parameters:
@@ -25,11 +34,9 @@ public struct GithubGraphqlClient {
 	public init(
 		appId: String,
 		privateKey: String,
-		installationLogin: String,
 		httpClient: HTTPClient? = nil
 	) async throws {
-		let client = try GithubApiClient(appId: appId, privateKey: privateKey, httpClient: httpClient)
-		self.client = client
+		self.init(try .init(appId: appId, privateKey: privateKey, httpClient: httpClient))
 	}
 
 
