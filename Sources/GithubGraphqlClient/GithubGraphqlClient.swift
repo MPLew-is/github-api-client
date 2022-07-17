@@ -11,8 +11,6 @@ import GithubGraphqlQueryable
 public struct GithubGraphqlClient {
 	/// Underlying client used to invoke the GitHub API
 	public let client: GithubApiClient
-	/// Unique installation ID corresponding to the textual login input as configuration.
-	private let installationId: Int
 
 	/**
 	Initialize an instance, passing through parameters to the underlying `GithubApiClient` initializer.
@@ -20,7 +18,6 @@ public struct GithubGraphqlClient {
 	- Parameters:
 		- appId: unique ID for the GitHub App this client is authenticating as an installation of
 		- privateKey: PEM-encoded private key of the GitHub App, to authenticate as the app to the GitHub API
-		- installationLogin: login name of the account the GitHub App has been installed on, and on whose resources the actual API calls will be made
 		- httpClient: if not provided, the instance will create a new one and destroy it on `deinit`
 
 	- Throws: Only rethrows errors produced during `GithubApiClient` initialization
@@ -32,8 +29,6 @@ public struct GithubGraphqlClient {
 		httpClient: HTTPClient? = nil
 	) async throws {
 		let client = try GithubApiClient(appId: appId, privateKey: privateKey, httpClient: httpClient)
-		self.installationId = try await client.getInstallationId(login: installationLogin)
-
 		self.client = client
 	}
 
@@ -49,11 +44,12 @@ public struct GithubGraphqlClient {
 	- Parameters:
 		- type: type conforming to `GithubGraphqlQueryable` from which to generate the query body and to construct an instance of
 		- id: node ID for the object being queried
+		- installationId: unique ID for the installation representing the account against which this query is being executed
 
 	- Returns: An instance of the input type, decoded from the GraphQL API response
 	- Throws: `GithubGraphqlClientError` for those defined error cases, also rethrows errors from the underlying HTTP client and encoding/decoding
 	*/
-	public func query<Value: GithubGraphqlQueryable>(_ type: Value.Type, id: String) async throws -> Value {
+	public func query<Value: GithubGraphqlQueryable>(_ type: Value.Type, id: String, for installationId: Int) async throws -> Value {
 		var request: HTTPClientRequest = GithubApiEndpoint.graphql.request
 
 		let query = type.query(id: id)
@@ -61,7 +57,7 @@ public struct GithubGraphqlClient {
 		let requestBody_data = try JSONEncoder().encode(requestBody)
 		request.body = .bytes(requestBody_data)
 
-		let response = try await client.execute(request, for: self.installationId)
+		let response = try await client.execute(request, for: installationId)
 		guard response.status == .ok else {
 			throw GithubGraphqlClientError.httpError(response)
 		}
@@ -79,6 +75,22 @@ public struct GithubGraphqlClient {
 
 			throw GithubGraphqlClientError.decodingError(responseBody)
 		}
+	}
+
+	/**
+	Query the GitHub GraphQL API, decoding the response into an instance of the input type.
+
+	- Parameters:
+		- type: type conforming to `GithubGraphqlQueryable` from which to generate the query body and to construct an instance of
+		- id: node ID for the object being queried
+		- installationLogin: username of the account against which this query is being executed
+
+	- Returns: An instance of the input type, decoded from the GraphQL API response
+	- Throws: `GithubGraphqlClientError` for those defined error cases, also rethrows errors from the underlying HTTP client and encoding/decoding
+	*/
+	public func query<Value: GithubGraphqlQueryable>(_ type: Value.Type, id: String, for installationLogin: String) async throws -> Value {
+		let installationId = try await self.client.getInstallationId(login: installationLogin)
+		return try await self.query(type, id: id, for: installationId)
 	}
 }
 

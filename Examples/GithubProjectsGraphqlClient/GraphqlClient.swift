@@ -110,12 +110,11 @@ struct GraphqlClient: AsyncParsableCommand {
 
 		let client: GithubGraphqlClient = try await .init(
 			appId: configuration.appId,
-			privateKey: configuration.privateKey,
-			installationLogin: configuration.username
+			privateKey: configuration.privateKey
 		)
 
 		do {
-			let item = try await client.query(ProjectItem.self, id: self.itemId)
+			let item = try await client.query(ProjectItem.self, id: self.itemId, for: configuration.username)
 			print(item)
 		}
 		catch GithubGraphqlClientError.httpError(let response) {
