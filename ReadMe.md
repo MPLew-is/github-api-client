@@ -39,7 +39,7 @@ Add to your `Package.Swift`:
 			...
 			dependencies: [
 				...
-				.product(name: "GithubGraphqlClient", package: "github-graphql-client"),
+				.product(name: "GithubApiClient", package: "github-graphql-client"),
 				.product(name: "GithubGraphqlQueryable", package: "github-graphql-client"),
 			]
 		),
@@ -68,13 +68,16 @@ import GithubGraphqlQueryable
 			...
 			-----END RSA PRIVATE KEY-----
 			""" // Replace with your GitHub App's private key
-		let client: GithubGraphqlClient = try await .init(
+		let client: GithubApiClient = try await .init(
 			appId: "123456", // Replace with your GitHub App ID
-			privateKey: privateKey,
-			installationLogin: "MPLew-is" // Replace with the user on which your app has been installed
+			privateKey: privateKey
 		)
 
-		let item = try await client.query(ProjectV2.self, id: "PVT_...") // Replace with the unique node ID for your GitHub Project (V2)
+		let item = try await client.graphqlQuery(
+			ProjectV2.self,
+			id: "PVT_...", // Replace with the unique node ID for your GitHub Project (V2)
+			for: "MPLew-is" // Replace with the user on which your app has been installed)
+		)
 	}
 }
 ```
@@ -85,7 +88,4 @@ import GithubGraphqlQueryable
 
 - `GithubGraphqlQueryable`: a protocol and associated types for automatic query generation and decoding from a GraphQL JSON response
 
-- `GithubApiClient`: a thin wrapper around [an `AsyncHTTPClient`](https://github.com/swift-server/async-http-client) which auto-injects the correct headers needed for the GitHub API, including the authentication needed for a GitHub App
-	- You can use this by itself if you want to perform actions against the GitHub API other than query GraphQL objects (like in [the GitHub Actions Webhook example](./Examples/GithubActionsWebhookClient))
-
-- `GithubGraphqlClient`: full client integrating the previous two targets into a simple interface for fetching and decoding a Swift object from a GraphQL server
+- `GithubApiClient`: an abstraction layer around supported GitHub API endpoints (including the GraphQL one), automatically handling the authentication needed for a GitHub App

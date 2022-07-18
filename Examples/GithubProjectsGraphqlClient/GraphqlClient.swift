@@ -5,7 +5,7 @@ import AsyncHTTPClient
 import NIOFoundationCompat
 import Yams
 
-import GithubGraphqlClient
+import GithubApiClient
 import GithubGraphqlQueryable
 
 
@@ -108,16 +108,16 @@ struct GraphqlClient: AsyncParsableCommand {
 		let decoder = YAMLDecoder()
 		let configuration = try decoder.decode(GraphqlClientConfiguration.self, from: configurationData)
 
-		let client: GithubGraphqlClient = try await .init(
+		let client: GithubApiClient = try .init(
 			appId: configuration.appId,
 			privateKey: configuration.privateKey
 		)
 
 		do {
-			let item = try await client.query(ProjectItem.self, id: self.itemId, for: configuration.username)
+			let item = try await client.graphqlQuery(ProjectItem.self, id: self.itemId, for: configuration.username)
 			print(item)
 		}
-		catch GithubGraphqlClientError.httpError(let response) {
+		catch GithubApiClient.GraphqlError.httpError(let response) {
 			print("Status: \(response.status)")
 
 			let responseBody: Data = .init(buffer: try await response.body.collect(upTo: 10 * 1024))

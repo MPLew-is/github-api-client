@@ -16,10 +16,6 @@ let package = Package(
 			name: "GithubGraphqlQueryable",
 			targets: ["GithubGraphqlQueryable"]
 		),
-		.library(
-			name: "GithubGraphqlClient",
-			targets: ["GithubGraphqlClient"]
-		),
 	],
 	dependencies: [
 		.package(url: "https://github.com/apple/swift-argument-parser", from: "1.1.0"),
@@ -32,6 +28,7 @@ let package = Package(
 		.target(
 			name: "GithubApiClient",
 			dependencies: [
+				"GithubGraphqlQueryable",
 				.product(name: "AsyncHTTPClient", package: "async-http-client"),
 				.product(name: "DeepCodable", package: "deep-codable"),
 				.product(name: "JWTKit", package: "jwt-kit"),
@@ -66,18 +63,10 @@ let package = Package(
 			name: "GithubGraphqlQueryableTests",
 			dependencies: ["GithubGraphqlQueryable"]
 		),
-		.target(
-			name: "GithubGraphqlClient",
-			dependencies: [
-				"GithubApiClient",
-				"GithubGraphqlQueryable",
-				.product(name: "AsyncHTTPClient", package: "async-http-client"),
-			]
-		),
 		.executableTarget(
 			name: "GithubProjectsGraphqlClient",
 			dependencies: [
-				"GithubGraphqlClient",
+				"GithubApiClient",
 				"GithubGraphqlQueryable",
 				.product(name: "ArgumentParser", package: "swift-argument-parser"),
 				.product(name: "AsyncHTTPClient", package: "async-http-client"),
