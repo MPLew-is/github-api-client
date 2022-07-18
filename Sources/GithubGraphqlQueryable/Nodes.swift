@@ -159,6 +159,34 @@ public struct GithubGraphqlField<Root: DeepDecodable>: GithubGraphqlQueryNode {
 		// `DeepDecodable` (really mostly just `Decodable`) already handles traversing type boundaries, no need for anything special here.
 		self.codingNodes = [.init(name, containing: targetPath)]
 	}
+
+	/**
+	Initialize an instance capturing an array of other `GithubGraphqlQueryable` objects.
+
+	This is distinct from a `FieldList` in that [the query shares the same syntax as just accessing a singular property](https://graphql.org/learn/queries/#fields), it just needs to be decoded into an array.
+
+	We need this extra specialization here to be able to bridge between query trees with different root types, which would otherwise violate the generic constraints.
+	This method type-erases the input key path's value type via passing it down to the corresponding `DeepCodingNode` initializer.
+
+	- Parameters:
+		- name: name of the field this node represents
+		- targetPath: key path into the root type holding another object representing a GraphQL query
+	*/
+	public init<Value: GithubGraphqlQueryable>(_ name: String, containing targetPath: KeyPath<Root, CodingValue<Array<Value>>>) {
+		self.name = name
+
+		self.children = nil
+
+		// Since the coding nodes already traverse nested type boundaries just fine, we just need to bridge the queries together, which is easy since we can just insert the partial query from the other type.
+		var childQuery = Value.query.partialQuery
+		if childQuery != "" {
+			childQuery = " \(childQuery) "
+		}
+		self.partialQuery = "\(name) {\(childQuery)}"
+
+		// `DeepDecodable` (really mostly just `Decodable`) already handles traversing type boundaries, no need for anything special here.
+		self.codingNodes = [.init(name, containing: targetPath)]
+	}
 }
 
 

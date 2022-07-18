@@ -250,4 +250,49 @@ final class QueryTests: XCTestCase {
 		let actual = ContainingType.query(id: id)
 		XCTAssertEqual(expected, actual)
 	}
+
+
+	/// Test that an array of decodable fields still produces the correct query.
+	func testFieldArrayDecodable() throws {
+		struct FieldArrayDecodable: GithubGraphqlQueryable {
+			static let query = Node(type: "FieldArrayDecodable") {
+				Field("example", containing: \._example)
+			}
+
+			@Value var example: [String]
+		}
+
+		let id = "Test"
+		let expected = """
+			query { node(id: "\(id)") { ... on FieldArrayDecodable { example } } }
+			"""
+		let actual = FieldArrayDecodable.query(id: id)
+		XCTAssertEqual(expected, actual)
+	}
+
+	/// Test that an array of other queryable fields produces the correct query (should be identical to if it were just a normal single-value field).
+	func testFieldArrayQueryable() throws {
+		struct FieldArrayQueryable: GithubGraphqlQueryable {
+			struct NestedType: GithubGraphqlQueryable {
+				static let query = Node(type: "NestedType") {
+					Field("example", containing: \._example)
+				}
+
+				@Value var example: String
+			}
+
+			static let query = Node(type: "FieldArrayQueryable") {
+				Field("nested", containing: \._nested)
+			}
+
+			@Value var nested: [NestedType]
+		}
+
+		let id = "Test"
+		let expected = """
+			query { node(id: "\(id)") { ... on FieldArrayQueryable { nested { ... on NestedType { example } } } } }
+			"""
+		let actual = FieldArrayQueryable.query(id: id)
+		XCTAssertEqual(expected, actual)
+	}
 }

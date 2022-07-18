@@ -188,4 +188,89 @@ final class RealWorldTests: XCTestCase {
 		XCTAssertEqual("Example field value", decoded.value)
 		XCTAssertEqual("Example field name", decoded.field)
 	}
+
+
+	/// Example object representing selected fields and child objects of a GitHub Projects (V2) single-select field
+	struct ProjectField: GithubGraphqlQueryable {
+		/// Example object representing a GitHub Projects (V2) single-select field option
+		struct Option: GithubGraphqlQueryable {
+			static let query = Node(type: "ProjectV2SingleSelectFieldOption") {
+				Field("id", containing: \._id)
+				Field("name", containing: \._name)
+			}
+
+			@Value var id: String
+			@Value var name: String
+		}
+
+		static let query = Node(type: "ProjectV2SingleSelectField") {
+			Field("options", containing: \._options)
+		}
+
+		@Value var options: [Option]
+	}
+
+	/// Test that creating a query for an array of field options generates the expected value.
+	func testProjectFieldOptionsQuery() throws {
+		let id = "PVTSSF_ABCD1234"
+		let expected = """
+			query { node(id: "\(id)") { ... on ProjectV2SingleSelectField { options { ... on ProjectV2SingleSelectFieldOption { id name } } } } }
+			"""
+		let actual = ProjectField.query(id: id)
+		XCTAssertEqual(expected, actual)
+	}
+
+	/// Test that decoding a project field options list from sample JSON produces the expected values.
+	func testProjectFieldOptionsDecoding() throws {
+		let json = """
+			{
+				"data": {
+					"node": {
+						"options": [
+							{
+								"id": "aaaa",
+								"name": "Example 1"
+							},
+							{
+								"id": "bbbb",
+								"name": "Example 2"
+							},
+							{
+								"id": "cccc",
+								"name": "Example 3"
+							},
+							{
+								"id": "dddd",
+								"name": "Example 4"
+							},
+							{
+								"id": "eeee",
+								"name": "Example 5"
+							}
+						]
+					}
+				}
+			}
+			"""
+		let decoded = try JSONDecoder().decode(ProjectField.self, from: json.data(using: .utf8)!)
+
+		let options = decoded.options
+
+		XCTAssertEqual(5, options.count)
+
+		XCTAssertEqual("aaaa", options[0].id)
+		XCTAssertEqual("Example 1", options[0].name)
+
+		XCTAssertEqual("bbbb", options[1].id)
+		XCTAssertEqual("Example 2", options[1].name)
+
+		XCTAssertEqual("cccc", options[2].id)
+		XCTAssertEqual("Example 3", options[2].name)
+
+		XCTAssertEqual("dddd", options[3].id)
+		XCTAssertEqual("Example 4", options[3].name)
+
+		XCTAssertEqual("eeee", options[4].id)
+		XCTAssertEqual("Example 5", options[4].name)
+	}
 }
