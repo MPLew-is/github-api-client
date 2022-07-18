@@ -288,7 +288,7 @@ public class GithubApiClient {
 		let body_data = try JSONEncoder().encode(body)
 		modifiedRequest.body = .bytes(body_data)
 
-		return try await self.execute(request, for: installationId, timeout: timeout)
+		return try await self.execute(modifiedRequest, for: installationId, timeout: timeout)
 	}
 }
 
