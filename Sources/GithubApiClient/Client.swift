@@ -242,6 +242,7 @@ public class GithubApiClient {
 
 	- Parameters:
 		- request: HTTP request object to be executed (after injecting any needed authentication/etc. headers)
+		- installationId: GitHub App installation ID that the API is being called on behalf of
 		- timeout: timeout for completing the HTTP request
 
 	- Returns: An `HTTPClientResponse` from the underlying `AsyncHTTPClient` implementation, representing the response to the input request
