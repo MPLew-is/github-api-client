@@ -269,3 +269,43 @@ public struct GithubGraphqlFieldList<Root: DeepDecodable>: GithubGraphqlQueryNod
 		self.codingNodes = [.init(name, children: [nodesNode])]
 	}
 }
+
+
+/// Object representing [a GraphQL field with arguments](https://graphql.org/learn/schema/#arguments), which must contain another `GithubGraphqlQueryable` object
+public struct GithubGraphqlFilteredField<Root: DeepDecodable>: GithubGraphqlQueryNode {
+	// This alias seems to be required for the compiler to reason about the types, see [a related post on the Swift forums](https://forums.swift.org/t/what-are-the-rules-on-inheriting-associated-types-from-protocols/58757/7).
+	public typealias Root = Root
+
+
+	/// Name of the field containing the list of other nodes
+	internal let name: String
+
+	public let partialQuery: String
+	public let codingNodes: [CodingNode]
+
+
+	/**
+	Initialize an instance capturing another `GithubGraphqlQueryable` object.
+
+	Since we're filtering a field based on an argument, we require the child type to be optional since the filter may not produce any results.
+	We also require this to be another `GithubGraphqlQueryable` object since we have to have sub-fields selected to actually construct a query.
+
+	This method type-erases the input key path's value type via passing it down to the corresponding `DeepCodingNode` initializer.
+
+	- Parameters:
+		- name: name of the field this node represents
+		- filterName: argument value to the "name" argument being filtered on
+		- targetPath: key path into the root type holding another object representing a GraphQL query
+	*/
+	public init<Value: GithubGraphqlQueryable>(_ name: String, name filterName: String, containing targetPath: KeyPath<Root, CodingValue<Value?>>) {
+		self.name = name
+
+		var childQuery = Value.query.partialQuery
+		if childQuery != "" {
+			childQuery = " \(childQuery) "
+		}
+		self.partialQuery = "\(name)(name: \"\(filterName)\") {\(childQuery)}"
+
+		self.codingNodes = [.init(name, containing: targetPath)]
+	}
+}

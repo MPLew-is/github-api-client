@@ -295,4 +295,31 @@ final class QueryTests: XCTestCase {
 		let actual = FieldArrayQueryable.query(id: id)
 		XCTAssertEqual(expected, actual)
 	}
+
+
+	/// Test that a field with a filter argument produces the correct query.
+	func testFilteredField() throws {
+		struct FilteredField: GithubGraphqlQueryable {
+			struct SubField: GithubGraphqlQueryable {
+				static let query = Node(type: "SubField") {
+					Field("example", containing: \._example)
+				}
+
+				@Value var example: String
+			}
+
+			static let query = Node(type: "FilteredField") {
+				FilteredField("filtered", name: "Example", containing: \._filtered)
+			}
+
+			@Value var filtered: SubField?
+		}
+
+		let id = "Test"
+		let expected = """
+			query { node(id: "\(id)") { ... on FilteredField { filtered(name: "Example") { ... on SubField { example } } } } }
+			"""
+		let actual = FilteredField.query(id: id)
+		XCTAssertEqual(expected, actual)
+	}
 }

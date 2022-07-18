@@ -36,21 +36,28 @@ public extension GithubGraphqlQueryable {
 
 	This also has the advantage of scoping this short type name to within the conforming type, rather than polluting the global namespace.
 	*/
-	typealias Field     = GithubGraphqlField<Self>
+	typealias Field         = GithubGraphqlField<Self>
 
 	/**
 	Shortcut type alias to allow `IfType` to be used in the users' type declarations instead of the full type name
 
 	This also has the advantage of scoping this short type name to within the conforming type, rather than polluting the global namespace.
 	*/
-	typealias IfType    = GithubGraphqlIfType<Self>
+	typealias IfType        = GithubGraphqlIfType<Self>
 
 	/**
 	Shortcut type alias to allow `FieldList` to be used in the users' type declarations instead of the full type name
 
 	This also has the advantage of scoping this short type name to within the conforming type, rather than polluting the global namespace.
 	*/
-	typealias FieldList = GithubGraphqlFieldList<Self>
+	typealias FieldList     = GithubGraphqlFieldList<Self>
+
+	/**
+	Shortcut type alias to allow `FilteredField` to be used in the users' type declarations instead of the full type name
+
+	This also has the advantage of scoping this short type name to within the conforming type, rather than polluting the global namespace.
+	*/
+	typealias FilteredField = GithubGraphqlFilteredField<Self>
 }
 
 

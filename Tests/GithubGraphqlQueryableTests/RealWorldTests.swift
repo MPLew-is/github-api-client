@@ -273,4 +273,52 @@ final class RealWorldTests: XCTestCase {
 		XCTAssertEqual("eeee", options[4].id)
 		XCTAssertEqual("Example 5", options[4].name)
 	}
+
+
+	/// Example object representing selected fields and child objects of a GitHub Projects (V2) project
+	struct Project: GithubGraphqlQueryable {
+		/// Example object representing selected fields of a GitHub Projects (V2) single-select field (without child objects)
+		struct ProjectFieldShallow: GithubGraphqlQueryable {
+			static let query = Node(type: "ProjectV2SingleSelectField") {
+				Field("name", containing: \._name)
+			}
+
+			@Value var name: String
+		}
+
+		static let query = Node(type: "ProjectV2") {
+			FilteredField("field", name: "Status", containing: \._field)
+		}
+
+		@Value var field: ProjectFieldShallow?
+	}
+
+	/// Test that creating a query for a field with arguments generates the expected value.
+	func testProjectFilteredFieldQuery() throws {
+		let id = "PVT_ABCD1234"
+		let expected = """
+			query { node(id: "\(id)") { ... on ProjectV2 { field(name: "Status") { ... on ProjectV2SingleSelectField { name } } } } }
+			"""
+		let actual = Project.query(id: id)
+		XCTAssertEqual(expected, actual)
+	}
+
+	/// Test that decoding a project field options list from sample JSON produces the expected values.
+	func testProjectFilteredFieldDecoding() throws {
+		let json = """
+			{
+				"data": {
+					"node": {
+						"field": {
+							"name": "Example"
+						}
+					}
+				}
+			}
+			"""
+		let decoded = try JSONDecoder().decode(Project.self, from: json.data(using: .utf8)!)
+
+		XCTAssertNotNil(decoded.field)
+		XCTAssertEqual("Example", decoded.field?.name)
+	}
 }
