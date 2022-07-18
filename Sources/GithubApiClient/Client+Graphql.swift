@@ -44,14 +44,10 @@ public extension GithubApiClient {
 	- Throws: `GraphqlError` for those defined error cases, also rethrows errors from the underlying HTTP client and encoding/decoding
 	*/
 	func graphqlQuery<Value: GithubGraphqlQueryable>(_ type: Value.Type, id: String, for installationId: Int) async throws -> Value {
-		var request: HTTPClientRequest = GithubApiEndpoint.graphql.request
+		let request: HTTPClientRequest = GithubApiEndpoint.graphql.request
+		let requestBody = GraphqlRequest(query: type.query(id: id))
 
-		let query = type.query(id: id)
-		let requestBody: GraphqlRequest = .init(query: query)
-		let requestBody_data = try JSONEncoder().encode(requestBody)
-		request.body = .bytes(requestBody_data)
-
-		let response = try await self.execute(request, for: installationId)
+		let response = try await self.execute(request, body: requestBody, for: installationId)
 		guard response.status == .ok else {
 			throw GraphqlError.httpError(response)
 		}
