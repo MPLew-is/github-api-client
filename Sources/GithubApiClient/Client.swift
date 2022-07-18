@@ -267,6 +267,29 @@ public class GithubApiClient {
 
 		return try await self.httpClient.execute(modifiedRequest, timeout: timeout)
 	}
+
+	/**
+	Execute an input HTTP request, auto-encoding an encodable body for convenience.
+
+	This simply encodes the body and passes the request down to `execute(_:for:timeout:)`, so see that method for more information.
+
+	- Parameters:
+		- request: HTTP request object to be executed (after attaching an encoded body)
+		- body: instance of encodable type to attach to the request
+		- installationId: GitHub App installation ID that the API is being called on behalf of
+		- timeout: timeout for completing the HTTP request
+
+	- Returns: An `HTTPClientResponse` from the underlying `AsyncHTTPClient` implementation, representing the response to the input request
+	- Throws: Only rethrows errors from the underlying `AsyncHTTPClient`/encoding/decoding calls
+	*/
+	public func execute<Body: Encodable>(_ request: HTTPClientRequest, body: Body, for installationId: Int, timeout: NIOCore.TimeAmount = .seconds(10)) async throws -> HTTPClientResponse {
+		var modifiedRequest = request
+
+		let body_data = try JSONEncoder().encode(body)
+		modifiedRequest.body = .bytes(body_data)
+
+		return try await self.execute(request, for: installationId, timeout: timeout)
+	}
 }
 
 
