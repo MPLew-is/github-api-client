@@ -309,7 +309,7 @@ public enum GithubApiEndpoint {
 	case graphql
 
 
-	/// The HTTP method associated with the endpoint
+	/// HTTP method associated with the endpoint
 	public var method: HTTPMethod {
 		switch self {
 			case .appInstallations:
@@ -319,7 +319,7 @@ public enum GithubApiEndpoint {
 		}
 	}
 
-	/// The path component corresponding the endpoint
+	/// Path component corresponding the endpoint
 	public var path: String {
 		switch self {
 			case .appInstallations:
@@ -336,7 +336,7 @@ public enum GithubApiEndpoint {
 		}
 	}
 
-	/// The full URL corresponding to the endpoint
+	/// Full URL corresponding to the endpoint
 	public var url: String {
 		return "\(Self.baseUrl)/\(self.path)"
 	}
