@@ -78,10 +78,11 @@ struct WebhookClient: AsyncParsableCommand {
 		requestBody.append(try payloadFile.handle.readToEnd()!)
 		requestBody.append(suffix.data(using: .utf8)!)
 
-		var request: HTTPClientRequest = GithubApiEndpoint.repositoryDispatch(username: configuration.username, repository: configuration.repository).request
-		request.body = .bytes(requestBody)
-
-		let response = try await client.execute(request, for: installationId)
+		let response = try await client.execute(
+			.repositoryDispatch(username: configuration.username, repository: configuration.repository),
+			body: requestBody,
+			for: installationId
+		)
 
 		guard response.status == .noContent else {
 			print("Status: \(response.status)")

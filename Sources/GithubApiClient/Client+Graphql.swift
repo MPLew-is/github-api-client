@@ -7,11 +7,6 @@ import GithubGraphqlQueryable
 
 
 public extension GithubApiClient {
-	/// Helper struct representing the wrapped query for sending the GitHub API
-	private struct GraphqlRequest: Encodable {
-		let query: String
-	}
-
 	/// Object representing defined error cases in querying and decoding an object from the GraphQL API
 	enum GraphqlError: Error {
 		/**
@@ -32,6 +27,21 @@ public extension GithubApiClient {
 		case decodingError(String)
 	}
 
+
+	/**
+	Query the GitHub GraphQL API with the input request body.
+
+	- Parameters:
+		- body: raw query body object to be attached to the request
+		- installationId: unique ID for the installation representing the account against which this query is being executed
+
+	- Returns: An `HTTPClientResponse` representing the response to the input query object
+	- Throws: Only rethrows errors from the underlying `execute` call
+	*/
+	func graphqlQuery(_ body: GraphqlRequest, for installationId: Int) async throws -> HTTPClientResponse {
+		return try await self.execute(.graphql, body: body, for: installationId)
+	}
+
 	/**
 	Query the GitHub GraphQL API, decoding the response into an instance of the input type.
 
@@ -44,10 +54,8 @@ public extension GithubApiClient {
 	- Throws: `GraphqlError` for those defined error cases, also rethrows errors from the underlying HTTP client and encoding/decoding
 	*/
 	func graphqlQuery<Value: GithubGraphqlQueryable>(_ type: Value.Type, id: String, for installationId: Int) async throws -> Value {
-		let request: HTTPClientRequest = GithubApiEndpoint.graphql.request
 		let requestBody = GraphqlRequest(query: type.query(id: id))
-
-		let response = try await self.execute(request, body: requestBody, for: installationId)
+		let response = try await self.graphqlQuery(requestBody, for: installationId)
 		guard response.status == .ok else {
 			throw GraphqlError.httpError(response)
 		}
@@ -82,4 +90,13 @@ public extension GithubApiClient {
 		let installationId = try await self.getInstallationId(login: installationLogin)
 		return try await self.graphqlQuery(type, id: id, for: installationId)
 	}
+}
+
+
+/// [GraphQL request body](https://graphql.org/learn/serving-over-http/#post-request)
+public struct GraphqlRequest: Encodable {
+	/// `query` parameter in [the GraphQL request body](https://graphql.org/learn/serving-over-http/#post-request)
+	let query: String
+	/// `variables` parameter in [the GraphQL request body](https://graphql.org/learn/serving-over-http/#post-request)
+	let variables: String? = nil
 }
