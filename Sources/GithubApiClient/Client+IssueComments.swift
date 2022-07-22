@@ -47,7 +47,16 @@ public extension GithubApiClient {
 /// Request body for [creating an issue comment](https://docs.github.com/en/rest/issues/comments#create-an-issue-comment)
 public struct CreateIssueCommentRequest: Encodable {
 	/// `body` parameter in request body for [creating an issue comment](https://docs.github.com/en/rest/issues/comments#create-an-issue-comment)
-	let body: String
+	public let body: String
+
+	/**
+	Initialize an instance from its component properties.
+
+	- Parameter body: new issue comment body text (`body` parameter in request body for [creating an issue comment](https://docs.github.com/en/rest/issues/comments#create-an-issue-comment))
+	*/
+	public init(body: String) {
+		self.body = body
+	}
 }
 
 
@@ -116,5 +125,14 @@ public enum IssueCommentReaction: String, Encodable {
 /// Request body for [adding a reaction to an issue comment](https://docs.github.com/en/rest/reactions#create-reaction-for-an-issue-comment)
 public struct CreateIssueCommentReactionRequest: Encodable {
 	/// `content` parameter in request body for [adding a reaction to an issue comment](https://docs.github.com/en/rest/reactions#create-reaction-for-an-issue-comment)
-	let content: IssueCommentReaction
+	public let content: IssueCommentReaction
+
+	/**
+	Initialize an instance from its component properties.
+
+	- Parameter content: new issue reaction choice (`content` parameter in request body for [adding a reaction to an issue comment](https://docs.github.com/en/rest/reactions#create-reaction-for-an-issue-comment))
+	*/
+	public init(content: IssueCommentReaction) {
+		self.content = content
+	}
 }

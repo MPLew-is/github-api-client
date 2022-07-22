@@ -96,7 +96,19 @@ public extension GithubApiClient {
 /// [GraphQL request body](https://graphql.org/learn/serving-over-http/#post-request)
 public struct GraphqlRequest: Encodable {
 	/// `query` parameter in [the GraphQL request body](https://graphql.org/learn/serving-over-http/#post-request)
-	let query: String
+	public let query: String
 	/// `variables` parameter in [the GraphQL request body](https://graphql.org/learn/serving-over-http/#post-request)
-	let variables: String? = nil
+	public let variables: String?
+
+	/**
+	Initialize an instance from its component properties.
+
+	- Parameters:
+		- query: GraphQL query string (`query` parameter in [the GraphQL request body](https://graphql.org/learn/serving-over-http/#post-request))
+		- variables: GraphQL variables string (`variables` parameter in [the GraphQL request body](https://graphql.org/learn/serving-over-http/#post-request))
+	*/
+	public init(query: String, variables: String? = nil) {
+		self.query     = query
+		self.variables = variables
+	}
 }
