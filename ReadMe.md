@@ -1,6 +1,8 @@
-# GitHub GraphQL Client #
+# GitHub API and GraphQL Client #
 
-This package provides a GitHub GraphQL API client, automatically handling:
+This package provides a generic GitHub API client (`GithubApiClient`) as well as `Codable`-like GitHub GraphQL querying and decoding based on an object's properties.
+
+These two targets automatically handle:
 - [Authenticating as a GitHub App](https://docs.github.com/en/developers/apps/building-github-apps/authenticating-with-github-apps#authenticating-as-a-github-app)
 - Building GraphQL queries from Swift objects
 - Decoding Swift objects from GraphQL responses
@@ -17,6 +19,13 @@ Using this tree, the actual GraphQL query string can be automatically generated,
 
 GraphQL functionality is currently designed only for GitHub's GraphQL API and may not function correctly with any other GraphQL server.
 Additionally, this is still in **extremely early development** and may not yet support even all GitHub GraphQL querying operations.
+
+The GitHub API client has explicit helper methods for a limited subset of the full API, currently including:
+- Basic app authentication
+- GraphQL queries
+- Posting issue comments and reactions
+
+However, any arbitrary API call may be made, with authentication automatically injected.
 
 
 ## Quick Start ##
