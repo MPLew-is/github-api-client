@@ -89,10 +89,6 @@ struct ProjectItem: GithubGraphqlQueryable, CustomStringConvertible {
 	}
 }
 
-struct GraphqlRequest: Encodable {
-	let query: String
-}
-
 
 @main
 struct GraphqlClient: AsyncParsableCommand {
